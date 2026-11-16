@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Práctica de pronunciación · Español A1–B1</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--acc:#c0392b;--ok:#2e7d4f;--mid:#b7791f;--line:#e3dfd6;--blue:#2f5d8a}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+header,main{max-width:640px;margin:auto}
+header{padding:14px 16px 4px}
+h1{font-size:1.15rem;margin:0}
+.sub{color:var(--mute);font-size:.8rem;margin-top:2px}
+main{padding:0 12px 48px}
+.banner{background:#fff4e5;border:1px solid #f0d3a8;color:#6b4a12;border-radius:10px;padding:10px 12px;font-size:.85rem;margin-top:10px}
+.levels{display:flex;gap:6px;margin:10px 0 8px}
+.levels button{flex:1;padding:10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:650;font-size:1rem;color:var(--ink)}
+.levels button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.row{display:flex;gap:6px}
+select{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:.9rem;color:var(--ink)}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-top:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chip{display:inline-block;font-size:.75rem;padding:3px 9px;border-radius:999px;background:#efe9df;color:#5a4a33}
+.count{font-size:.8rem;color:var(--mute)}
+.phrase{font-size:1.6rem;font-weight:650;margin:14px 0 4px;line-height:1.3}
+.syl{font-size:1.05rem;color:var(--mute);letter-spacing:.03em;min-height:1.2em}
+.syl b{color:var(--acc)}
+.best{font-size:.78rem;color:var(--mute);margin-top:4px}
+.tip{font-size:.85rem;color:#3d3d40;background:#faf8f3;border-left:3px solid var(--acc);padding:8px 10px;margin-top:12px;border-radius:4px;line-height:1.45}
+.tip .ja{color:var(--mute);display:block;margin-top:4px}
+.btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.btns button,.nav button{padding:11px 6px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:.95rem;line-height:1.2;color:var(--ink)}
+small{display:block;font-size:.68rem;color:var(--mute);margin-top:2px}
+.rec{width:100%;margin-top:10px;padding:16px;border-radius:14px;border:none;background:var(--acc);color:#fff;font-size:1.1rem;font-weight:700}
+.rec small{color:rgba(255,255,255,.85)}
+.rec.live{background:#7a1f16;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.72}}
+button:disabled{opacity:.4}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.score{display:flex;align-items:baseline;gap:10px}
+#scoreNum{font-size:2rem;font-weight:750}
+#scoreMsg{font-size:.95rem}
+.words{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.w{padding:4px 9px;border-radius:8px;font-size:1rem}
+.w.ok{background:#e3f2e8;color:var(--ok)}
+.w.no{background:#fbe3e0;color:var(--acc);text-decoration:underline wavy}
+.heard{font-size:.85rem;color:var(--mute);margin-top:8px}
+.note{font-size:.88rem;margin-top:8px;line-height:1.45}
+.note.warn{color:#8a3b10}
+canvas{width:100%;height:170px;display:block;margin-top:12px;background:#fcfbf8;border-radius:10px;border:1px solid var(--line)}
+.legend{font-size:.75rem;color:var(--mute);margin-top:4px;display:flex;gap:14px}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:4px}
+.l1{border-top:3px dashed rgba(47,93,138,.55)}
+.l2{border-top:3px solid var(--acc)}
+details{margin-top:14px;background:#fff;border-radius:12px;padding:10px 14px}
+summary{font-weight:600;cursor:pointer}
+details p,details li{font-size:.86rem;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:.82rem;margin:6px 0 12px}
+td,th{border-bottom:1px solid var(--line);padding:5px 4px;text-align:left;vertical-align:top}
+th{color:var(--mute);font-weight:600}
+h3{font-size:.95rem;margin:12px 0 2px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Práctica de pronunciación</h1>
+  <div class="sub">Español A1–B1 · スペイン語発音練習</div>
+</header>
+<main>
+  <div id="banner" class="banner" hidden></div>
+
+  <div class="levels" id="levels"></div>
+  <div class="row">
+    <select id="cat" aria-label="Categoría"></select>
+    <select id="variety" aria-label="Variedad" style="flex:.7">
+      <option value="es-MX">Latinoamérica</option>
+      <option value="es-ES">España</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="chip" id="chip"></span><span class="count" id="count"></span></div>
+    <div class="phrase" id="phrase"></div>
+    <div class="syl" id="syl"></div>
+    <div class="best" id="best"></div>
+    <div class="btns">
+      <button id="bListen">🔊 Escuchar<small>聞く</small></button>
+      <button id="bSlow">🐢 Lento<small>ゆっくり</small></button>
+      <button id="bMine" disabled>▶ Mi voz<small>自分の声</small></button>
+    </div>
+    <button class="rec" id="bRec">🎙 Grabar<small>録音する</small></button>
+    <div class="tip" id="tip"></div>
+    <div class="nav">
+      <button id="bPrev">← Anterior<small>前へ</small></button>
+      <button id="bNext">Siguiente →<small>次へ</small></button>
+    </div>
+  </div>
+
+  <div class="card" id="res" hidden>
+    <div class="score"><span id="scoreNum">–</span><span id="scoreMsg"></span></div>
+    <div class="words" id="words"></div>
+    <div class="heard" id="heard"></div>
+    <div class="note" id="contrastMsg"></div>
+    <canvas id="cv"></canvas>
+    <div class="legend"><span><i class="l1"></i>Modelo お手本</span><span><i class="l2"></i>Tu voz 自分の声</span></div>
+    <div class="note" id="intoMsg"></div>
+  </div>
+  <audio id="pb" hidden></audio>
+
+  <details>
+    <summary>Cómo usar · 使い方</summary>
+    <ol>
+      <li>Escucha el modelo (🔊). 🔊でお手本を聞く。</li>
+      <li>Pulsa 🎙 Grabar y di la frase. Se detiene sola al terminar. 🎙を押して文を言う（終わると自動で止まる）。</li>
+      <li>Revisa: palabras en verde = se entendieron; en rojo = no se entendieron. 緑＝認識された、赤＝認識されなかった。</li>
+      <li>Compara tu curva de entonación (roja) con el modelo (azul). 赤い線（自分）と青い点線（お手本）を比べる。</li>
+    </ol>
+    <p><b>Importante:</b> la puntuación mide si un reconocedor automático <i>entiende</i> lo que dices (inteligibilidad), no la exactitud fonética. La curva muestra el tono de tu voz, relativo a tu propio registro. 点数は「機械に通じたか」を示すもので、発音の正確さの完全な評価ではありません。</p>
+    <p>Funciona mejor en <b>Chrome (Android)</b> o <b>Safari (iPhone)</b>, con conexión a internet y en un lugar silencioso.</p>
+  </details>
+
+  <details>
+    <summary>Lista completa · 全リスト</summary>
+    <div id="fullList"></div>
+  </details>
+</main>
+
+<script>
+"use strict";
+// ---------- Contenido ----------
+const CATS={
+ rr:{n:"r / rr",es:"rr y r inicial: la lengua vibra varias veces. r entre vocales: un solo toque rápido, parecido a la ラ japonesa.",ja:"rrと語頭のrは舌先を数回ふるわせる。母音の間のrは一回だけ軽くはじく（日本語のラ行に近い）。"},
+ rl:{n:"r / l",es:"l: la punta de la lengua se queda apoyada detrás de los dientes de arriba. r: solo un toque.",ja:"lは舌先を上の歯の裏につけたまま声を出す。rは一瞬はじくだけ。"},
+ ep:{n:"Sin vocales extra",es:"No añadas vocales después de las consonantes: «Madrid», no «madoriddo»; «español», no «esupañoru».",ja:"子音のあとに母音を足さない（×マドリッド ×エスパニョール → ○Madrid, español）。"},
+ gc:{n:"Grupos consonánticos",es:"pl, pr, tr, bl, fl, cl…: las dos consonantes van juntas, sin vocal en medio.",ja:"pl・tr・blなどは二つの子音を続けて発音し、間に母音を入れない。"},
+ f:{n:"La f",es:"El labio inferior toca suavemente los dientes de arriba. No es la «fu» japonesa.",ja:"下唇を上の歯に軽く当てて息を出す。日本語の「フ」（両唇）とは違う。"},
+ st:{n:"si · ti · di · tu",es:"si, ti, di, tu no son «shi, chi, ji, tsu». Mantén la lengua adelante.",ja:"si≠シ、ti≠チ、di≠ジ、tu≠ツ。舌先を前に保つ。"},
+ j:{n:"La j",es:"j, ge, gi: sonido fuerte desde el fondo de la boca, más áspero que la は japonesa.",ja:"j・ge・giは口の奥で強くこする音。日本語のハ行より強い。"},
+ dp:{n:"Diptongos e hiatos",es:"Diptongo (bue-nos, sie-te): dos vocales en una sola sílaba. Con tilde (tí-a, pa-ís): dos sílabas.",ja:"二重母音（bue, sie）は一音節で一気に。アクセント記号つき（tía, país）は二音節に分ける。"},
+ ac:{n:"Acento",es:"La sílaba en MAYÚSCULAS es más fuerte y un poco más larga. Si cambias el acento, cambia la palabra.",ja:"大文字の音節を強く、少し長く読む。位置が変わると別の単語になる。"},
+ en:{n:"Entonación",es:"Mira el patrón modelo (línea azul) e intenta seguir su forma.",ja:"青い点線のお手本の形をまねしてみよう。"}
+};
+// Patrones entonativos esquemáticos (semitonos relativos al tono medio del hablante)
+const PAT={
+ dec:{n:"Enunciativa ↘",pts:[[0,1],[.2,2],[.75,0],[1,-4]],end:-1,es:"Afirmación: el tono baja al final.",ja:"平叙文：文末で下がる。"},
+ yn:{n:"Pregunta sí/no ↗",pts:[[0,0],[.7,-1],[.85,0],[1,5]],end:1,es:"Pregunta de sí/no: el tono sube al final.",ja:"はい／いいえ疑問文：文末で上がる。"},
+ wh:{n:"Pregunta qu- ↘",pts:[[0,3],[.12,4],[.6,0],[1,-4]],end:-1,es:"Pregunta con qué/dónde/cómo…: empieza alto y baja al final.",ja:"疑問詞疑問文：高く始まり、文末で下がる。"},
+ exc:{n:"Exclamativa ↘",pts:[[0,4],[.15,6],[.6,1],[1,-4]],end:-1,es:"Exclamación: empieza muy alto y baja.",ja:"感嘆文：とても高く始まり、下がる。"},
+ enm:{n:"Enumeración",pts:[[0,0],[.25,2],[.3,3],[.36,0],[.55,2],[.62,3],[.68,0],[.85,1],[1,-4]],end:-1,es:"Enumeración: sube en cada elemento y baja en el último.",ja:"列挙：各項目で少し上がり、最後で下がる。"},
+ cnd:{n:"Dos partes ↗↘",pts:[[0,0],[.4,2],[.5,4],[.56,1],[.85,0],[1,-4]],end:-1,es:"Dos partes: sube antes de la coma y baja al final.",ja:"前半（コンマの前）で上がり、文末で下がる。"}
+};
+// c=categoría, t=texto, x=palabra en contraste, s=sílabas (MAYÚSCULA = tónica), p=patrón
+const DATA={
+A1:[
+ {c:"rr",t:"Digo perro.",x:"pero",s:"PE·rro"},
+ {c:"rr",t:"Digo pero.",x:"perro",s:"PE·ro"},
+ {c:"rr",t:"Digo carro.",x:"caro",s:"CA·rro"},
+ {c:"rr",t:"El perro corre.",s:"el PE·rro CO·rre"},
+ {c:"rr",t:"Me llamo Rosa."},
+ {c:"rl",t:"Digo pelo.",x:"pero",s:"PE·lo"},
+ {c:"rl",t:"Digo lata.",x:"rata",s:"LA·ta"},
+ {c:"rl",t:"Hola, me llamo Laura."},
+ {c:"ep",t:"Vivo en Madrid.",s:"VI·vo en ma·DRID"},
+ {c:"ep",t:"Hablo español.",s:"HA·blo es·pa·ÑOL"},
+ {c:"ep",t:"Es un hotel grande."},
+ {c:"gc",t:"Hay platos grandes."},
+ {c:"gc",t:"Es un problema."},
+ {c:"f",t:"Mi familia es grande."},
+ {c:"f",t:"El café está frío."},
+ {c:"st",t:"Sí, gracias."},
+ {c:"st",t:"¿Tienes tiempo?"},
+ {c:"st",t:"¿Y tú?"},
+ {c:"j",t:"Soy de Japón."},
+ {c:"j",t:"Juan tiene un hijo."},
+ {c:"dp",t:"Buenos días."},
+ {c:"dp",t:"Quiero agua, por favor."},
+ {c:"ac",t:"Digo papá.",x:"papa",s:"pa·PÁ"},
+ {c:"ac",t:"Digo papa.",x:"papá",s:"PA·pa"},
+ {c:"en",t:"Me llamo Carmen.",p:"dec"},
+ {c:"en",t:"¿Eres japonés?",p:"yn"},
+ {c:"en",t:"¿Dónde vives?",p:"wh"},
+ {c:"en",t:"¡Qué bonito!",p:"exc"}
+],
+A2:[
+ {c:"rr",t:"Digo ahorra.",x:"ahora",s:"a·HO·rra"},
+ {c:"rr",t:"Digo ahora.",x:"ahorra",s:"a·HO·ra"},
+ {c:"rr",t:"Digo cerro.",x:"cero",s:"CE·rro"},
+ {c:"rr",t:"Quiero arroz con pollo."},
+ {c:"rr",t:"El tren llega tarde."},
+ {c:"rl",t:"Digo pala.",x:"para",s:"PA·la"},
+ {c:"rl",t:"Digo para.",x:"pala",s:"PA·ra"},
+ {c:"rl",t:"Quiero leer un libro."},
+ {c:"rl",t:"El lunes leo en la librería."},
+ {c:"ep",t:"Estudio en la universidad."},
+ {c:"ep",t:"El examen es mañana."},
+ {c:"ep",t:"Necesito un taxi."},
+ {c:"gc",t:"Prefiero el autobús."},
+ {c:"gc",t:"Compré flores."},
+ {c:"gc",t:"Escribo una carta."},
+ {c:"gc",t:"La bicicleta es nueva."},
+ {c:"f",t:"Fui a una fiesta."},
+ {c:"f",t:"Mi profesor es fantástico."},
+ {c:"st",t:"Necesito silencio."},
+ {c:"st",t:"Me gusta el fútbol."},
+ {c:"st",t:"Tú tienes tos."},
+ {c:"j",t:"El viaje fue largo."},
+ {c:"j",t:"Juego con mis amigos los jueves."},
+ {c:"j",t:"La gente es muy amable."},
+ {c:"dp",t:"Me duele la cabeza."},
+ {c:"dp",t:"Siempre llueve en junio."},
+ {c:"dp",t:"Hoy hace mucho viento."},
+ {c:"ac",t:"Digo término.",x:"termino",s:"TÉR·mi·no"},
+ {c:"ac",t:"Digo termino.",x:"terminó",s:"ter·MI·no"},
+ {c:"ac",t:"Digo terminó.",x:"termino",s:"ter·mi·NÓ"},
+ {c:"en",t:"Ayer fui al cine con mi hermana.",p:"dec"},
+ {c:"en",t:"¿Has estado en México?",p:"yn"},
+ {c:"en",t:"¿Por qué estudias español?",p:"wh"},
+ {c:"en",t:"Quiero pan, leche y huevos.",p:"enm"}
+],
+B1:[
+ {c:"rr",t:"El perro de San Roque no tiene rabo."},
+ {c:"rr",t:"Recorrimos toda la región."},
+ {c:"rr",t:"Digo corro.",x:"coro",s:"CO·rro"},
+ {c:"rr",t:"Es un error terrible."},
+ {c:"rl",t:"El alcalde habló con el público."},
+ {c:"rl",t:"Pablo alquiló un local en el centro."},
+ {c:"rl",t:"Durante el verano, salgo a correr."},
+ {c:"ep",t:"Los estudiantes extranjeros."},
+ {c:"ep",t:"Es importante respetar el medio ambiente."},
+ {c:"ep",t:"Lee las instrucciones."},
+ {c:"gc",t:"Practicamos frases difíciles."},
+ {c:"gc",t:"El problema principal es el transporte."},
+ {c:"gc",t:"Necesitamos una explicación clara."},
+ {c:"f",t:"Afortunadamente, la final fue fantástica."},
+ {c:"f",t:"Fernando trabaja en una fábrica."},
+ {c:"st",t:"Tienes que decidir hoy."},
+ {c:"st",t:"La situación es difícil."},
+ {c:"st",t:"Visitamos un distrito histórico."},
+ {c:"j",t:"Generalmente, el gerente trabaja hasta tarde."},
+ {c:"j",t:"Dejé las llaves en el garaje."},
+ {c:"dp",t:"Mi tía vive en un país lejano."},
+ {c:"dp",t:"Aunque llueva, iremos."},
+ {c:"dp",t:"Continúo estudiando español."},
+ {c:"ac",t:"Digo continúo.",x:"continuo",s:"con·ti·NÚ·o"},
+ {c:"ac",t:"Digo práctico.",x:"practico",s:"PRÁC·ti·co"},
+ {c:"ac",t:"Digo practicó.",x:"practico",s:"prac·ti·CÓ"},
+ {c:"ac",t:"Digo célebre.",x:"celebre",s:"CÉ·le·bre"},
+ {c:"en",t:"Si tengo tiempo, iré a visitarte.",p:"cnd"},
+ {c:"en",t:"¿Te gustaría venir con nosotros?",p:"yn"},
+ {c:"en",t:"¿Cuánto tiempo llevas en Japón?",p:"wh"},
+ {c:"en",t:"¡Qué sorpresa verte aquí!",p:"exc"},
+ {c:"en",t:"Visité Lima, Cusco y Arequipa.",p:"enm"}
+]};
+
+// ---------- Estado ----------
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const state=Object.assign({level:"A1",cat:"all",idx:0,variety:"es-MX"},store.get("pp_state",{}));
+const best=store.get("pp_best",{});
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const hasMic=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+let actx=null, rs=null, lastSession=null;
+
+function save(){store.set("pp_state",state)}
+function list(){const all=DATA[state.level];return state.cat==="all"?all:all.filter(i=>i.c===state.cat)}
+function cur(){const l=list();if(state.idx>=l.length)state.idx=0;return l[state.idx]}
+function idOf(it){return state.level+"|"+it.t}
+function patOf(it){
+  if(it.p)return it.p;const t=it.t;
+  if(/^¿\s*(qué|dónde|adónde|cómo|cuándo|cuánt[oa]s?|quién(es)?|cuál(es)?|por qué)\b/i.test(t))return "wh";
+  if(t.includes("?"))return "yn";
+  if(t.startsWith("¡"))return "exc";
+  return "dec";
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function sylHTML(s){if(!s)return "";return s.split(" ").map(w=>w.split("·").map(x=>(x===x.toUpperCase()&&x!==x.toLowerCase())?"<b>"+esc(x)+"</b>":esc(x)).join("·")).join(" ")}
+
+// ---------- Render ----------
+function renderLevels(){
+  $("levels").innerHTML="";
+  for(const L of Object.keys(DATA)){
+    const b=document.createElement("button");b.textContent=L;b.className=L===state.level?"on":"";
+    b.onclick=()=>{state.level=L;state.cat="all";state.idx=0;save();renderAll()};
+    $("levels").appendChild(b);
+  }
+}
+function renderCats(){
+  const used=[...new Set(DATA[state.level].map(i=>i.c))];
+  if(state.cat!=="all"&&!used.includes(state.cat))state.cat="all";
+  $("cat").innerHTML='<option value="all">Todas las categorías</option>'+used.map(c=>`<option value="${c}">${esc(CATS[c].n)}</option>`).join("");
+  $("cat").value=state.cat;
+}
+function renderItem(){
+  const it=cur(),l=list(),p=PAT[patOf(it)];
+  $("chip").textContent=CATS[it.c].n+(it.c==="en"?" · "+p.n:"");
+  $("count").textContent=(state.idx+1)+" / "+l.length;
+  $("phrase").textContent=it.t;
+  $("syl").innerHTML=sylHTML(it.s);
+  const b=best[idOf(it)];$("best").textContent=b!=null?"Mejor resultado 最高: "+b+"%":"";
+  const tip=it.c==="en"?p:CATS[it.c];
+  $("tip").innerHTML=esc(tip.es)+'<span class="ja">'+esc(tip.ja)+"</span>";
+  $("res").hidden=true;$("bMine").disabled=true;lastSession=null;
+}
+function renderAll(){renderLevels();renderCats();renderItem()}
+function renderFullList(){
+  let h="";
+  for(const L of Object.keys(DATA)){
+    h+=`<h3>${L} (${DATA[L].length})</h3><table><tr><th>Categoría</th><th>Frase</th><th>Contraste / patrón</th></tr>`;
+    for(const it of DATA[L])h+=`<tr><td>${esc(CATS[it.c].n)}</td><td>${esc(it.t)}</td><td>${it.x?"≠ "+esc(it.x):(it.c==="en"?esc(PAT[patOf(it)].n):"")}</td></tr>`;
+    h+="</table>";
+  }
+  $("fullList").innerHTML=h;
+}
+
+// ---------- Voz modelo ----------
+let voices=[];
+function loadVoices(){try{voices=speechSynthesis.getVoices()}catch(e){}}
+if("speechSynthesis" in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function pickVoice(){
+  const es=voices.filter(v=>/^es[-_]/i.test(v.lang)||v.lang==="es");
+  const norm=v=>v.lang.replace("_","-");
+  if(state.variety==="es-ES")return es.find(v=>norm(v)==="es-ES")||es[0];
+  return es.find(v=>norm(v)==="es-MX")||es.find(v=>norm(v)!=="es-ES")||es[0];
+}
+function speak(rate){
+  if(!("speechSynthesis" in window)){flash("Este navegador no tiene voz sintética.");return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(cur().t);
+  const v=pickVoice();if(v){u.voice=v;u.lang=v.lang}else u.lang=state.variety;
+  u.rate=rate;speechSynthesis.speak(u);
+}
+
+// ---------- Detección de tono (autocorrelación) ----------
+function detectPitch(buf,sr){
+  // submuestreo x2
+  const n=buf.length>>1,x=new Float32Array(n);
+  for(let i=0;i<n;i++)x[i]=(buf[2*i]+buf[2*i+1])*.5;
+  const fs=sr/2;
+  let rms=0;for(let i=0;i<n;i++)rms+=x[i]*x[i];rms=Math.sqrt(rms/n);
+  if(rms<0.012)return null;
+  const minL=Math.floor(fs/500),maxL=Math.ceil(fs/70),N=n-maxL;
+  if(N<64)return null;
+  const r=new Float32Array(maxL+2);let bestV=0,bestL=-1;
+  let e0=0;for(let i=0;i<N;i++)e0+=x[i]*x[i];
+  for(let L=minL;L<=maxL+1;L++){
+    let s=0,e1=0;for(let i=0;i<N;i++){const b=x[i+L];s+=x[i]*b;e1+=b*b}
+    r[L]=s/Math.sqrt(e0*e1+1e-12);
+    if(r[L]>bestV){bestV=r[L];bestL=L}
+  }
+  if(bestV<0.6)return null;
+  // evitar errores de octava: primer pico local que alcance 90 % del máximo
+  for(let L=minL+1;L<=maxL;L++){if(r[L]>=0.9*bestV&&r[L]>=r[L-1]&&r[L]>=r[L+1]){bestL=L;break}}
+  const a=r[bestL-1]||0,b=r[bestL],c=r[bestL+1]||0,den=a-2*b+c;
+  const sh=den?0.5*(a-c)/den:0;
+  const f=fs/(bestL+sh);
+  return (f>=70&&f<=500)?f:null;
+}
+function median(a){const s=[...a].sort((p,q)=>p-q);return s[Math.floor(s.length/2)]}
+function contour(frames){
+  const v=frames.filter(f=>f.f);if(v.length<8)return null;
+  let med=median(v.map(x=>x.f));
+  let pts=v.filter(x=>x.f<med*1.8&&x.f>med*0.55);if(pts.length<8)return null;
+  med=median(pts.map(x=>x.f));
+  pts=pts.map(x=>({t:x.t,st:12*Math.log2(x.f/med)}));
+  pts=pts.map((p,i)=>{const w=pts.slice(Math.max(0,i-2),i+3).map(q=>q.st);return{t:p.t,st:median(w)}});
+  return{pts,t0:pts[0].t,t1:pts[pts.length-1].t};
+}
+function targetAt(pat,u){const P=pat.pts;for(let i=1;i<P.length;i++){if(u<=P[i][0]){const[a,b]=[P[i-1],P[i]];return a[1]+(b[1]-a[1])*(u-a[0])/(b[0]-a[0]||1)}}return P[P.length-1][1]}
+
+// ---------- Gráfico ----------
+function draw(c,pat,liveEnd){
+  const cv=$("cv"),dpr=window.devicePixelRatio||1,w=cv.clientWidth||320,h=170;
+  cv.width=w*dpr;cv.height=h*dpr;const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+  const ymin=-9,ymax=11,Y=st=>h-10-(Math.max(ymin,Math.min(ymax,st))-ymin)/(ymax-ymin)*(h-20),X=u=>12+u*(w-24);
+  g.strokeStyle="#e8e3d8";g.lineWidth=1;g.beginPath();g.moveTo(8,Y(0));g.lineTo(w-8,Y(0));g.stroke();
+  g.fillStyle="#9a958a";g.font="10px sans-serif";g.fillText("agudo ↑",14,14);g.fillText("grave ↓",14,h-4);
+  // modelo
+  g.setLineDash([7,6]);g.strokeStyle="rgba(47,93,138,.55)";g.lineWidth=5;g.lineCap="round";g.beginPath();
+  for(let k=0;k<=60;k++){const u=k/60,y=Y(targetAt(pat,u));k?g.lineTo(X(u),y):g.moveTo(X(u),y)}g.stroke();g.setLineDash([]);
+  if(!c)return;
+  const t0=c.t0,t1=liveEnd?Math.max(liveEnd,t0+1.5):c.t1,span=(t1-t0)||1;
+  g.strokeStyle="#c0392b";g.lineWidth=3;g.beginPath();let prev=null;
+  for(const p of c.pts){const x=X((p.t-t0)/span),y=Y(p.st);if(!prev||p.t-prev.t>0.12)g.moveTo(x,y);else g.lineTo(x,y);prev=p}
+  g.stroke();
+}
+
+// ---------- Comparación de texto ----------
+function words(s,strict){
+  let t=s.toLowerCase().replace(/[¿?¡!.,;:«»"()…]/g," ");
+  if(!strict)t=t.normalize("NFD").replace(/[̀-́̈]/g,"").normalize("NFC");
+  return t.split(/\s+/).filter(Boolean);
+}
+function align(a,b){
+  const n=a.length,m=b.length,d=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)d[i][j]=a[i]===b[j]?d[i+1][j+1]+1:Math.max(d[i+1][j],d[i][j+1]);
+  const ok=new Array(n).fill(false);let i=0,j=0;
+  while(i<n&&j<m){if(a[i]===b[j]){ok[i]=true;i++;j++}else if(d[i+1][j]>=d[i][j+1])i++;else j++}
+  return ok;
+}
+
+// ---------- Grabación ----------
+// El micrófono se pide una sola vez y se reutiliza mientras la página esté abierta.
+let mic=null;
+function getMic(){
+  if(mic&&mic.stream.getAudioTracks().some(t=>t.readyState==="live"))return Promise.resolve(mic);
+  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(stream=>{
+    const src=actx.createMediaStreamSource(stream),an=actx.createAnalyser();an.fftSize=2048;src.connect(an);
+    mic={stream,an};return mic;
+  });
+}
+function releaseMic(){if(mic){mic.stream.getTracks().forEach(t=>t.stop());mic=null}}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){if(rs)stopRec();releaseMic()}});
+window.addEventListener("pagehide",releaseMic);
+function setRecUI(on){const b=$("bRec");b.classList.toggle("live",on);b.innerHTML=on?"■ Detener<small>停止</small>":"🎙 Grabar<small>録音する</small>"}
+function flash(m){$("banner").hidden=false;$("banner").textContent=m}
+
+function startRec(){
+  if(rs){stopRec();return}
+  if(!hasMic){flash("Este navegador no permite usar el micrófono. Abre la página en Chrome o Safari (dirección https).");return}
+  try{speechSynthesis.cancel()}catch(e){}
+  const it=cur();
+  const s={it,frames:[],t0:performance.now(),final:"",interim:"",stopped:false,evaluated:false};
+  rs=s;setRecUI(true);
+  $("res").hidden=false;$("scoreNum").textContent="…";$("scoreMsg").textContent="Escuchando… 聞いています";
+  $("words").innerHTML="";$("heard").textContent="";$("contrastMsg").textContent="";$("intoMsg").textContent="";
+  draw(null,PAT[patOf(it)]);
+  try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}
+  if(SR){
+    try{
+      const r=new SR();r.lang=state.variety;r.interimResults=true;r.maxAlternatives=1;r.continuous=false;
+      r.onresult=e=>{let fin="",inter="";for(let i=0;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)fin+=x[0].transcript+" ";else inter+=x[0].transcript}
+        if(fin.trim())s.final=fin.trim();s.interim=inter;
+        $("heard").textContent="Se oyó 認識: "+(s.final||inter);
+        if(s.evaluated)evaluate(s);};
+      r.onerror=e=>{s.recErr=e.error};
+      r.onend=()=>{s.recEnded=true;if(rs===s&&(!s.recErr||s.recErr==="no-speech"))stopRec()};
+      r.start();s.rec=r;
+    }catch(e){s.recErr="start"}
+  }else s.recErr="unsupported";
+  getMic().then(m=>{
+    if(s.stopped)return;
+    const stream=m.stream,an=m.an;
+    s.an=an;s.buf=new Float32Array(an.fftSize);s.t0=performance.now();
+    try{s.chunks=[];s.mr=new MediaRecorder(stream);s.mr.ondataavailable=e=>{if(e.data&&e.data.size)s.chunks.push(e.data)};s.mr.start()}catch(e){}
+    loop(s);
+  }).catch(err=>{s.micErr=err.name||"error";if(!s.rec)stopRec()});
+  s.timer=setTimeout(()=>{if(rs===s)stopRec()},10000);
+}
+let fc=0;
+function loop(s){
+  if(s.stopped)return;
+  s.an.getFloatTimeDomainData(s.buf);
+  const t=(performance.now()-s.t0)/1000;
+  s.frames.push({t,f:detectPitch(s.buf,actx.sampleRate)});
+  if((fc++%4)===0)draw(contour(s.frames),PAT[patOf(s.it)],t);
+  requestAnimationFrame(()=>loop(s));
+}
+function stopRec(){
+  const s=rs;if(!s||s.stopped)return;
+  s.stopped=true;rs=null;clearTimeout(s.timer);setRecUI(false);
+  try{if(s.rec&&!s.recEnded)s.rec.stop()}catch(e){}
+  if(s.mr&&s.mr.state!=="inactive"){s.mr.onstop=()=>{try{const blob=new Blob(s.chunks,{type:s.mr.mimeType||"audio/mp4"});$("pb").src=URL.createObjectURL(blob);if(s.it===cur())$("bMine").disabled=false}catch(e){}};try{s.mr.stop()}catch(e){}}
+  lastSession=s;
+  setTimeout(()=>evaluate(s),(s.rec&&!s.final)?800:60);
+}
+function evaluate(s){
+  s.evaluated=true;if(s.it!==cur())return;
+  const it=s.it,pat=PAT[patOf(it)],strict=it.c==="ac";
+  const heard=s.final||s.interim||"";
+  const cMsg=$("contrastMsg");cMsg.className="note";cMsg.textContent="";
+  if(heard){
+    const tw=words(it.t,strict),hw=words(heard,strict),ok=align(tw,hw);
+    const shown=it.t.replace(/[¿?¡!.,;:]/g,"").split(/\s+/).filter(Boolean);
+    $("words").innerHTML=shown.map((w,i)=>`<span class="w ${ok[i]?"ok":"no"}">${esc(w)}</span>`).join("");
+    const sc=Math.round(100*ok.filter(Boolean).length/tw.length);
+    $("scoreNum").textContent=sc+"%";
+    $("scoreNum").style.color=sc>=90?"var(--ok)":sc>=60?"var(--mid)":"var(--acc)";
+    $("scoreMsg").textContent=sc>=90?"¡Muy bien! よくできました":sc>=60?"Casi. もう少し":"Otra vez. もう一度";
+    $("heard").textContent="Se oyó 認識: "+heard;
+    if(it.x){
+      const target=tw[tw.length-1],xw=words(it.x,strict)[0];
+      if(hw.includes(xw)&&!hw.includes(target)){cMsg.className="note warn";cMsg.textContent=`Se entendió «${it.x}» en lugar de «${target}». 「${it.x}」と聞こえました。`}
+      else if(hw.includes(target)){cMsg.textContent=`✓ Se distinguió «${target}» de «${it.x}».`}
+    }
+    const id=idOf(it);if(best[id]==null||sc>best[id]){best[id]=sc;store.set("pp_best",best)}
+    $("best").textContent="Mejor resultado 最高: "+best[id]+"%";
+  }else{
+    $("scoreNum").textContent="–";$("scoreNum").style.color="";
+    let m="No se reconoció ninguna palabra. もう一度、はっきり言ってみよう。";
+    if(s.recErr==="unsupported")m="Este navegador no tiene reconocimiento de voz; solo se muestra la entonación. この端末では音声認識が使えません。";
+    else if(s.recErr==="not-allowed"||s.recErr==="service-not-allowed")m="Permiso de reconocimiento de voz denegado. Revisa los ajustes del navegador. 音声認識の許可が必要です。";
+    else if(s.recErr==="network")m="El reconocimiento de voz necesita conexión a internet.";
+    else if(s.recErr&&s.recErr!=="no-speech"&&s.recErr!=="aborted")m="Reconocimiento no disponible ("+s.recErr+"). Solo se muestra la entonación.";
+    $("scoreMsg").textContent="";$("words").innerHTML="";$("heard").textContent=m;
+  }
+  if(s.micErr){$("intoMsg").className="note warn";$("intoMsg").textContent="No se pudo usar el micrófono ("+s.micErr+"): sin curva de entonación. マイクの許可を確認してください。";draw(null,pat);return}
+  const c=contour(s.frames);draw(c,pat);
+  const im=$("intoMsg");im.className="note";
+  if(!c){im.textContent="No se detectó suficiente voz para dibujar la curva. もう少し大きな声で。";return}
+  const dur=c.t1-c.t0,seg=(a,b)=>{const q=c.pts.filter(p=>p.t>=c.t0+a*dur&&p.t<=c.t0+b*dur).map(p=>p.st);return q.length?q.reduce((x,y)=>x+y,0)/q.length:null};
+  const late=seg(.88,1),mid=seg(.55,.8);
+  const sts=c.pts.map(p=>p.st).sort((a,b)=>a-b),range=sts[Math.floor(sts.length*.9)]-sts[Math.floor(sts.length*.1)];
+  let dir=null;if(late!=null&&mid!=null){const d=late-mid;dir=d>1.5?1:d<-1.5?-1:0}
+  const name=v=>v===1?"sube ↗":v===-1?"baja ↘":"queda plano →";
+  let msg="";
+  if(dir!==null){msg=(dir===pat.end?"✓ ":"✗ ")+"Al final tu tono "+name(dir)+"; el modelo "+name(pat.end)+". ";
+    msg+=dir===pat.end?"文末の上がり下がりはお手本どおり。":(pat.end===1?"文末をもっと上げてみよう。":"文末をもっと下げてみよう。")}
+  if(range<3)msg+=" Tu entonación es bastante plana: exagera un poco más. 抑揚が少なめ。もう少し大げさに。";
+  im.textContent=msg;
+}
+
+// ---------- Eventos ----------
+$("bListen").onclick=()=>speak(0.9);
+$("bSlow").onclick=()=>speak(0.6);
+$("bMine").onclick=()=>{const p=$("pb");p.currentTime=0;p.play().catch(()=>{})};
+$("bRec").onclick=startRec;
+$("bPrev").onclick=()=>{if(rs)stopRec();const n=list().length;state.idx=(state.idx-1+n)%n;save();renderItem()};
+$("bNext").onclick=()=>{if(rs)stopRec();state.idx=(state.idx+1)%list().length;save();renderItem()};
+$("cat").onchange=e=>{state.cat=e.target.value;state.idx=0;save();renderItem()};
+$("variety").value=state.variety;
+$("variety").onchange=e=>{state.variety=e.target.value;save()};
+window.addEventListener("resize",()=>{if(lastSession&&!rs)draw(contour(lastSession.frames),PAT[patOf(lastSession.it)])});
+
+(function checks(){
+  const m=[];
+  if(!window.isSecureContext)m.push("La página debe abrirse desde una dirección https:// para usar el micrófono.");
+  if(!hasMic)m.push("Este navegador no permite el micrófono.");
+  if(!SR)m.push("Este navegador no tiene reconocimiento de voz: se mostrará solo la entonación. Usa Chrome (Android) o Safari (iPhone).");
+  if(m.length)flash(m.join(" "));
+})();
+renderAll();renderFullList();
+</script>
+</body>
+</html>
