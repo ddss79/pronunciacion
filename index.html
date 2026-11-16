@@ -18,7 +18,7 @@ main{padding:0 12px 48px}
 .levels button{flex:1;padding:10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:650;font-size:1rem;color:var(--ink)}
 .levels button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .row{display:flex;gap:6px}
-select{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:.9rem;color:var(--ink)}
+select{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:.9rem;color:var(--ink)}
 .card{background:var(--card);border-radius:16px;padding:16px;margin-top:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .chip{display:inline-block;font-size:.75rem;padding:3px 9px;border-radius:999px;background:#efe9df;color:#5a4a33}
@@ -28,7 +28,8 @@ select{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);backg
 .syl b{color:var(--acc)}
 .best{font-size:.78rem;color:var(--mute);margin-top:4px}
 .tip{font-size:.85rem;color:#3d3d40;background:#faf8f3;border-left:3px solid var(--acc);padding:8px 10px;margin-top:12px;border-radius:4px;line-height:1.45}
-.tip .ja{color:var(--mute);display:block;margin-top:4px}
+.tip .sec{color:var(--mute);display:block;margin-top:4px}
+.source{font-size:.72rem;color:var(--mute);text-align:center;margin-top:14px}
 .btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
 .btns button,.nav button{padding:11px 6px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:.95rem;line-height:1.2;color:var(--ink)}
 small{display:block;font-size:.68rem;color:var(--mute);margin-top:2px}
@@ -37,6 +38,10 @@ small{display:block;font-size:.68rem;color:var(--mute);margin-top:2px}
 .rec.live{background:#7a1f16;animation:pulse 1.2s infinite}
 @keyframes pulse{50%{opacity:.72}}
 button:disabled{opacity:.4}
+button{transition:transform .08s,background .15s;-webkit-tap-highlight-color:transparent}
+button:active:not(:disabled){transform:scale(.94);background:#f0ece4}
+.btns button.playing{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btns button.playing small{color:rgba(255,255,255,.85)}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .score{display:flex;align-items:baseline;gap:10px}
 #scoreNum{font-size:2rem;font-weight:750}
@@ -48,7 +53,7 @@ button:disabled{opacity:.4}
 .heard{font-size:.85rem;color:var(--mute);margin-top:8px}
 .note{font-size:.88rem;margin-top:8px;line-height:1.45}
 .note.warn{color:#8a3b10}
-canvas{width:100%;height:170px;display:block;margin-top:12px;background:#fcfbf8;border-radius:10px;border:1px solid var(--line)}
+canvas{width:100%;height:230px;display:block;margin-top:12px;background:#fcfbf8;border-radius:10px;border:1px solid var(--line)}
 .legend{font-size:.75rem;color:var(--mute);margin-top:4px;display:flex;gap:14px}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:4px}
 .l1{border-top:3px dashed rgba(47,93,138,.55)}
@@ -64,8 +69,8 @@ h3{font-size:.95rem;margin:12px 0 2px}
 </head>
 <body>
 <header>
-  <h1>Práctica de pronunciación</h1>
-  <div class="sub">Español A1–B1 · スペイン語発音練習</div>
+  <h1>スペイン語 発音練習</h1>
+  <div class="sub">Práctica de pronunciación · A1–B1</div>
 </header>
 <main>
   <div id="banner" class="banner" hidden></div>
@@ -74,8 +79,8 @@ h3{font-size:.95rem;margin:12px 0 2px}
   <div class="row">
     <select id="cat" aria-label="Categoría"></select>
     <select id="variety" aria-label="Variedad" style="flex:.7">
-      <option value="es-MX">Latinoamérica</option>
-      <option value="es-ES">España</option>
+      <option value="es-MX">中南米 Latinoamérica</option>
+      <option value="es-ES">スペイン España</option>
     </select>
   </div>
 
@@ -85,15 +90,15 @@ h3{font-size:.95rem;margin:12px 0 2px}
     <div class="syl" id="syl"></div>
     <div class="best" id="best"></div>
     <div class="btns">
-      <button id="bListen">🔊 Escuchar<small>聞く</small></button>
-      <button id="bSlow">🐢 Lento<small>ゆっくり</small></button>
-      <button id="bMine" disabled>▶ Mi voz<small>自分の声</small></button>
+      <button id="bListen">🔊 聞く<small>Escuchar</small></button>
+      <button id="bSlow">🐢 ゆっくり<small>Lento</small></button>
+      <button id="bMine" disabled>▶ 自分の声<small>Mi voz</small></button>
     </div>
-    <button class="rec" id="bRec">🎙 Grabar<small>録音する</small></button>
+    <button class="rec" id="bRec">🎙 録音する<small>Grabar</small></button>
     <div class="tip" id="tip"></div>
     <div class="nav">
-      <button id="bPrev">← Anterior<small>前へ</small></button>
-      <button id="bNext">Siguiente →<small>次へ</small></button>
+      <button id="bPrev">← 前へ<small>Anterior</small></button>
+      <button id="bNext">次へ →<small>Siguiente</small></button>
     </div>
   </div>
 
@@ -103,55 +108,56 @@ h3{font-size:.95rem;margin:12px 0 2px}
     <div class="heard" id="heard"></div>
     <div class="note" id="contrastMsg"></div>
     <canvas id="cv"></canvas>
-    <div class="legend"><span><i class="l1"></i>Modelo お手本</span><span><i class="l2"></i>Tu voz 自分の声</span></div>
+    <div class="legend"><span><i class="l1"></i>お手本 Modelo</span><span><i class="l2"></i>自分の声 Tu voz</span></div>
     <div class="note" id="intoMsg"></div>
   </div>
   <audio id="pb" hidden></audio>
 
   <details>
-    <summary>Cómo usar · 使い方</summary>
+    <summary>使い方 · Cómo usar</summary>
     <ol>
-      <li>Escucha el modelo (🔊). 🔊でお手本を聞く。</li>
-      <li>Pulsa 🎙 Grabar y di la frase. Se detiene sola al terminar. 🎙を押して文を言う（終わると自動で止まる）。</li>
-      <li>Revisa: palabras en verde = se entendieron; en rojo = no se entendieron. 緑＝認識された、赤＝認識されなかった。</li>
-      <li>Compara tu curva de entonación (roja) con el modelo (azul). 赤い線（自分）と青い点線（お手本）を比べる。</li>
+      <li>🔊でお手本を聞く。 Escucha el modelo.</li>
+      <li>🎙を押して文を言う（終わると自動で止まる）。 Pulsa 🎙 y di la frase.</li>
+      <li>緑＝認識された単語、赤＝認識されなかった単語。 Verde = se entendió; rojo = no se entendió.</li>
+      <li>赤い線（自分の声）と青い点線（お手本）を比べる。特に「文末」で上がるか下がるかに注意。 Compara tu curva (roja) con el modelo (azul), sobre todo al final.</li>
     </ol>
-    <p><b>Importante:</b> la puntuación mide si un reconocedor automático <i>entiende</i> lo que dices (inteligibilidad), no la exactitud fonética. La curva muestra el tono de tu voz, relativo a tu propio registro. 点数は「機械に通じたか」を示すもので、発音の正確さの完全な評価ではありません。</p>
-    <p>Funciona mejor en <b>Chrome (Android)</b> o <b>Safari (iPhone)</b>, con conexión a internet y en un lugar silencioso.</p>
+    <p><b>注意：</b>点数は「機械に通じたか」を示すもので、発音の正確さを完全に評価するものではありません。線は声の高さ（イントネーション）を表し、個々の音は表しません。<br><span style="color:var(--mute)">La puntuación mide si el reconocedor entiende la frase, no la exactitud fonética. La curva muestra el tono de la voz, no los sonidos.</span></p>
+    <p>Android は <b>Chrome</b>、iPhone は <b>Safari</b> で、インターネットに接続し、静かな場所で使ってください。</p>
   </details>
 
   <details>
-    <summary>Lista completa · 全リスト</summary>
+    <summary>全リスト · Lista completa</summary>
     <div id="fullList"></div>
   </details>
+  <div class="source" id="source"></div>
 </main>
 
 <script>
 "use strict";
 // ---------- Contenido ----------
-const CATS={
- rr:{n:"r / rr",es:"rr y r inicial: la lengua vibra varias veces. r entre vocales: un solo toque rápido, parecido a la ラ japonesa.",ja:"rrと語頭のrは舌先を数回ふるわせる。母音の間のrは一回だけ軽くはじく（日本語のラ行に近い）。"},
- rl:{n:"r / l",es:"l: la punta de la lengua se queda apoyada detrás de los dientes de arriba. r: solo un toque.",ja:"lは舌先を上の歯の裏につけたまま声を出す。rは一瞬はじくだけ。"},
- ep:{n:"Sin vocales extra",es:"No añadas vocales después de las consonantes: «Madrid», no «madoriddo»; «español», no «esupañoru».",ja:"子音のあとに母音を足さない（×マドリッド ×エスパニョール → ○Madrid, español）。"},
- gc:{n:"Grupos consonánticos",es:"pl, pr, tr, bl, fl, cl…: las dos consonantes van juntas, sin vocal en medio.",ja:"pl・tr・blなどは二つの子音を続けて発音し、間に母音を入れない。"},
- f:{n:"La f",es:"El labio inferior toca suavemente los dientes de arriba. No es la «fu» japonesa.",ja:"下唇を上の歯に軽く当てて息を出す。日本語の「フ」（両唇）とは違う。"},
- st:{n:"si · ti · di · tu",es:"si, ti, di, tu no son «shi, chi, ji, tsu». Mantén la lengua adelante.",ja:"si≠シ、ti≠チ、di≠ジ、tu≠ツ。舌先を前に保つ。"},
- j:{n:"La j",es:"j, ge, gi: sonido fuerte desde el fondo de la boca, más áspero que la は japonesa.",ja:"j・ge・giは口の奥で強くこする音。日本語のハ行より強い。"},
- dp:{n:"Diptongos e hiatos",es:"Diptongo (bue-nos, sie-te): dos vocales en una sola sílaba. Con tilde (tí-a, pa-ís): dos sílabas.",ja:"二重母音（bue, sie）は一音節で一気に。アクセント記号つき（tía, país）は二音節に分ける。"},
- ac:{n:"Acento",es:"La sílaba en MAYÚSCULAS es más fuerte y un poco más larga. Si cambias el acento, cambia la palabra.",ja:"大文字の音節を強く、少し長く読む。位置が変わると別の単語になる。"},
- en:{n:"Entonación",es:"Mira el patrón modelo (línea azul) e intenta seguir su forma.",ja:"青い点線のお手本の形をまねしてみよう。"}
+let CATS={
+ rr:{nja:"r と rr",nes:"r / rr",es:"rr y r inicial: la lengua vibra varias veces. r entre vocales: un solo toque rápido, parecido a la ラ japonesa.",ja:"rrと語頭のrは舌先を数回ふるわせる。母音の間のrは一回だけ軽くはじく（日本語のラ行に近い）。"},
+ rl:{nja:"r と l",nes:"r / l",es:"l: la punta de la lengua se queda apoyada detrás de los dientes de arriba. r: solo un toque.",ja:"lは舌先を上の歯の裏につけたまま声を出す。rは一瞬はじくだけ。"},
+ ep:{nja:"余分な母音なし",nes:"Sin vocales extra",es:"No añadas vocales después de las consonantes: «Madrid», no «madoriddo»; «español», no «esupañoru».",ja:"子音のあとに母音を足さない（×マドリッド ×エスパニョール → ○Madrid, español）。"},
+ gc:{nja:"子音の連続",nes:"Grupos consonánticos",es:"pl, pr, tr, bl, fl, cl…: las dos consonantes van juntas, sin vocal en medio.",ja:"pl・tr・blなどは二つの子音を続けて発音し、間に母音を入れない。"},
+ f:{nja:"f の音",nes:"La f",es:"El labio inferior toca suavemente los dientes de arriba. No es la «fu» japonesa.",ja:"下唇を上の歯に軽く当てて息を出す。日本語の「フ」（両唇）とは違う。"},
+ st:{nja:"si・ti・di・tu",nes:"si · ti · di · tu",es:"si, ti, di, tu no son «shi, chi, ji, tsu». Mantén la lengua adelante.",ja:"si≠シ、ti≠チ、di≠ジ、tu≠ツ。舌先を前に保つ。"},
+ j:{nja:"j の音",nes:"La j",es:"j, ge, gi: sonido fuerte desde el fondo de la boca, más áspero que la は japonesa.",ja:"j・ge・giは口の奥で強くこする音。日本語のハ行より強い。"},
+ dp:{nja:"二重母音・母音分立",nes:"Diptongos e hiatos",es:"Diptongo (bue-nos, sie-te): dos vocales en una sola sílaba. Con tilde (tí-a, pa-ís): dos sílabas.",ja:"二重母音（bue, sie）は一音節で一気に。アクセント記号つき（tía, país）は二音節に分ける。"},
+ ac:{nja:"アクセント",nes:"Acento",es:"La sílaba en MAYÚSCULAS es más fuerte y un poco más larga. Si cambias el acento, cambia la palabra.",ja:"大文字の音節を強く、少し長く読む。位置が変わると別の単語になる。"},
+ en:{nja:"イントネーション",nes:"Entonación",es:"Mira el patrón modelo (línea azul) e intenta seguir su forma.",ja:"青い点線のお手本の形をまねしてみよう。"}
 };
 // Patrones entonativos esquemáticos (semitonos relativos al tono medio del hablante)
 const PAT={
- dec:{n:"Enunciativa ↘",pts:[[0,1],[.2,2],[.75,0],[1,-4]],end:-1,es:"Afirmación: el tono baja al final.",ja:"平叙文：文末で下がる。"},
- yn:{n:"Pregunta sí/no ↗",pts:[[0,0],[.7,-1],[.85,0],[1,5]],end:1,es:"Pregunta de sí/no: el tono sube al final.",ja:"はい／いいえ疑問文：文末で上がる。"},
- wh:{n:"Pregunta qu- ↘",pts:[[0,3],[.12,4],[.6,0],[1,-4]],end:-1,es:"Pregunta con qué/dónde/cómo…: empieza alto y baja al final.",ja:"疑問詞疑問文：高く始まり、文末で下がる。"},
- exc:{n:"Exclamativa ↘",pts:[[0,4],[.15,6],[.6,1],[1,-4]],end:-1,es:"Exclamación: empieza muy alto y baja.",ja:"感嘆文：とても高く始まり、下がる。"},
- enm:{n:"Enumeración",pts:[[0,0],[.25,2],[.3,3],[.36,0],[.55,2],[.62,3],[.68,0],[.85,1],[1,-4]],end:-1,es:"Enumeración: sube en cada elemento y baja en el último.",ja:"列挙：各項目で少し上がり、最後で下がる。"},
- cnd:{n:"Dos partes ↗↘",pts:[[0,0],[.4,2],[.5,4],[.56,1],[.85,0],[1,-4]],end:-1,es:"Dos partes: sube antes de la coma y baja al final.",ja:"前半（コンマの前）で上がり、文末で下がる。"}
+ dec:{nja:"平叙文 ↘",n:"Enunciativa ↘",pts:[[0,1],[.2,2],[.75,0],[1,-4]],end:-1,es:"Afirmación: el tono baja al final.",ja:"平叙文：文末で下がる。"},
+ yn:{nja:"はい／いいえ疑問文 ↗",n:"Pregunta sí/no ↗",pts:[[0,0],[.7,-1],[.85,0],[1,5]],end:1,es:"Pregunta de sí/no: el tono sube al final.",ja:"はい／いいえ疑問文：文末で上がる。"},
+ wh:{nja:"疑問詞疑問文 ↘",n:"Pregunta qu- ↘",pts:[[0,3],[.12,4],[.6,0],[1,-4]],end:-1,es:"Pregunta con qué/dónde/cómo…: empieza alto y baja al final.",ja:"疑問詞疑問文：高く始まり、文末で下がる。"},
+ exc:{nja:"感嘆文 ↘",n:"Exclamativa ↘",pts:[[0,4],[.15,6],[.6,1],[1,-4]],end:-1,es:"Exclamación: empieza muy alto y baja.",ja:"感嘆文：とても高く始まり、下がる。"},
+ enm:{nja:"列挙",n:"Enumeración",pts:[[0,0],[.25,2],[.3,3],[.36,0],[.55,2],[.62,3],[.68,0],[.85,1],[1,-4]],end:-1,es:"Enumeración: sube en cada elemento y baja en el último.",ja:"列挙：各項目で少し上がり、最後で下がる。"},
+ cnd:{nja:"二つの部分 ↗↘",n:"Dos partes ↗↘",pts:[[0,0],[.4,2],[.5,4],[.56,1],[.85,0],[1,-4]],end:-1,es:"Dos partes: sube antes de la coma y baja al final.",ja:"前半（コンマの前）で上がり、文末で下がる。"}
 };
 // c=categoría, t=texto, x=palabra en contraste, s=sílabas (MAYÚSCULA = tónica), p=patrón
-const DATA={
+let DATA={
 A1:[
  {c:"rr",t:"Digo perro.",x:"pero",s:"PE·rro"},
  {c:"rr",t:"Digo pero.",x:"perro",s:"PE·ro"},
@@ -253,6 +259,42 @@ B1:[
  {c:"en",t:"Visité Lima, Cusco y Arequipa.",p:"enm"}
 ]};
 
+
+// ===== CONFIGURACIÓN · 設定 =====
+// Enlaces CSV de la hoja de Google publicada en la web (Archivo → Compartir → Publicar en la web).
+// Si están vacíos, se usa el contenido integrado de arriba.
+const SHEET={
+  frases:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSyQCprZs4K8aXDla4yeBYli1m1gRCWJ_4DBPTsFAlKUdPddd9idLObaybBSmC1vqCysr_n16rHVAHN/pub?gid=54657972&single=true&output=csv",
+  categorias:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSyQCprZs4K8aXDla4yeBYli1m1gRCWJ_4DBPTsFAlKUdPddd9idLObaybBSmC1vqCysr_n16rHVAHN/pub?gid=1725461179&single=true&output=csv"
+};
+function catName(c){return c?(c.nja&&c.nes&&c.nja!==c.nes?c.nja+" · "+c.nes:(c.nja||c.nes||"")):""}
+function parseCSV(text){
+  const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<text.length;i++){const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
+    else if(ch==='"')q=true;
+    else if(ch===","){row.push(f);f=""}
+    else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&text[i+1]==="\n")i++;row.push(f);rows.push(row);row=[];f=""}
+    else f+=ch}
+  if(f!==""||row.length){row.push(f);rows.push(row)}
+  return rows.filter(r=>r.some(c=>c.trim()!==""));
+}
+function toObjs(rows){if(!rows.length)return[];const h=rows[0].map(x=>x.trim().toLowerCase());return rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>o[k]=(r[i]||"").trim());return o})}
+function buildContent(catRows,fraseRows){
+  const cats={};
+  for(const r of catRows){if(!r.id)continue;cats[r.id]={nja:r.nombre_ja||"",nes:r.nombre_es||r.id,ja:r.consejo_ja||"",es:r.consejo_es||""}}
+  const data={};
+  for(const r of fraseRows){
+    const L=(r.nivel||"").toUpperCase(),t=r.frase;if(!L||!t)continue;
+    const c=r.categoria||"otros";if(!cats[c])cats[c]={nja:"",nes:c,ja:"",es:""};
+    const it={c,t};if(r.contraste)it.x=r.contraste;if(r.silabas)it.s=r.silabas;
+    const pp=(r.patron||"").toLowerCase();if(PAT[pp])it.p=pp;
+    (data[L]=data[L]||[]).push(it);
+  }
+  if(!Object.keys(data).length)throw new Error("sin frases");
+  const sorted={};Object.keys(data).sort().forEach(k=>sorted[k]=data[k]);
+  return{cats,data:sorted};
+}
 // ---------- Estado ----------
 const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
@@ -263,7 +305,7 @@ const hasMic=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
 let actx=null, rs=null, lastSession=null;
 
 function save(){store.set("pp_state",state)}
-function list(){const all=DATA[state.level];return state.cat==="all"?all:all.filter(i=>i.c===state.cat)}
+function list(){if(!DATA[state.level]){state.level=Object.keys(DATA)[0];state.idx=0}const all=DATA[state.level];return state.cat==="all"?all:all.filter(i=>i.c===state.cat)}
 function cur(){const l=list();if(state.idx>=l.length)state.idx=0;return l[state.idx]}
 function idOf(it){return state.level+"|"+it.t}
 function patOf(it){
@@ -288,26 +330,26 @@ function renderLevels(){
 function renderCats(){
   const used=[...new Set(DATA[state.level].map(i=>i.c))];
   if(state.cat!=="all"&&!used.includes(state.cat))state.cat="all";
-  $("cat").innerHTML='<option value="all">Todas las categorías</option>'+used.map(c=>`<option value="${c}">${esc(CATS[c].n)}</option>`).join("");
+  $("cat").innerHTML='<option value="all">すべて · Todas</option>'+used.map(c=>`<option value="${c}">${esc(catName(CATS[c]))}</option>`).join("");
   $("cat").value=state.cat;
 }
 function renderItem(){
   const it=cur(),l=list(),p=PAT[patOf(it)];
-  $("chip").textContent=CATS[it.c].n+(it.c==="en"?" · "+p.n:"");
+  $("chip").textContent=catName(CATS[it.c])+(it.c==="en"?" · "+p.nja:"");
   $("count").textContent=(state.idx+1)+" / "+l.length;
   $("phrase").textContent=it.t;
   $("syl").innerHTML=sylHTML(it.s);
-  const b=best[idOf(it)];$("best").textContent=b!=null?"Mejor resultado 最高: "+b+"%":"";
-  const tip=it.c==="en"?p:CATS[it.c];
-  $("tip").innerHTML=esc(tip.es)+'<span class="ja">'+esc(tip.ja)+"</span>";
+  const b=best[idOf(it)];$("best").textContent=b!=null?"最高 Mejor: "+b+"%":"";
+  const tip=(it.c==="en"||!(CATS[it.c].ja||CATS[it.c].es))?p:CATS[it.c];
+  $("tip").innerHTML=esc(tip.ja||tip.es)+(tip.ja&&tip.es?'<span class="sec">'+esc(tip.es)+"</span>":"");
   $("res").hidden=true;$("bMine").disabled=true;lastSession=null;
 }
 function renderAll(){renderLevels();renderCats();renderItem()}
 function renderFullList(){
   let h="";
   for(const L of Object.keys(DATA)){
-    h+=`<h3>${L} (${DATA[L].length})</h3><table><tr><th>Categoría</th><th>Frase</th><th>Contraste / patrón</th></tr>`;
-    for(const it of DATA[L])h+=`<tr><td>${esc(CATS[it.c].n)}</td><td>${esc(it.t)}</td><td>${it.x?"≠ "+esc(it.x):(it.c==="en"?esc(PAT[patOf(it)].n):"")}</td></tr>`;
+    h+=`<h3>${L} (${DATA[L].length})</h3><table><tr><th>カテゴリー</th><th>文 Frase</th><th>対比・型</th></tr>`;
+    for(const it of DATA[L])h+=`<tr><td>${esc(catName(CATS[it.c]))}</td><td>${esc(it.t)}</td><td>${it.x?"≠ "+esc(it.x):(it.c==="en"?esc(PAT[patOf(it)].nja):"")}</td></tr>`;
     h+="</table>";
   }
   $("fullList").innerHTML=h;
@@ -323,12 +365,22 @@ function pickVoice(){
   if(state.variety==="es-ES")return es.find(v=>norm(v)==="es-ES")||es[0];
   return es.find(v=>norm(v)==="es-MX")||es.find(v=>norm(v)!=="es-ES")||es[0];
 }
-function speak(rate){
-  if(!("speechSynthesis" in window)){flash("Este navegador no tiene voz sintética.");return}
+let playTimer=null;
+function setPlaying(btn,on,label){
+  ["bListen","bSlow","bMine"].forEach(id=>{const b=$(id);b.classList.remove("playing");if(b.dataset.html){b.innerHTML=b.dataset.html}});
+  if(on&&btn){btn.dataset.html=btn.dataset.html||btn.innerHTML;btn.classList.add("playing");btn.innerHTML=label}
+}
+function speak(rate,btn){
+  if(!("speechSynthesis" in window)){flash("この端末では音声合成が使えません。Este navegador no tiene voz sintética.");return}
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(cur().t);
   const v=pickVoice();if(v){u.voice=v;u.lang=v.lang}else u.lang=state.variety;
-  u.rate=rate;speechSynthesis.speak(u);
+  u.rate=rate;
+  const done=()=>{clearTimeout(playTimer);setPlaying(null,false)};
+  u.onend=done;u.onerror=done;
+  setPlaying(btn,true,"🔊 再生中…<small>Sonando</small>");
+  clearTimeout(playTimer);playTimer=setTimeout(done,15000);
+  speechSynthesis.speak(u);
 }
 
 // ---------- Detección de tono (autocorrelación) ----------
@@ -364,27 +416,44 @@ function contour(frames){
   med=median(pts.map(x=>x.f));
   pts=pts.map(x=>({t:x.t,st:12*Math.log2(x.f/med)}));
   pts=pts.map((p,i)=>{const w=pts.slice(Math.max(0,i-2),i+3).map(q=>q.st);return{t:p.t,st:median(w)}});
+  // suavizado adicional (media móvil de ±60 ms)
+  pts=pts.map(p=>{const w=pts.filter(q=>Math.abs(q.t-p.t)<=0.06);return{t:p.t,st:w.reduce((s,q)=>s+q.st,0)/w.length}});
   return{pts,t0:pts[0].t,t1:pts[pts.length-1].t};
 }
 function targetAt(pat,u){const P=pat.pts;for(let i=1;i<P.length;i++){if(u<=P[i][0]){const[a,b]=[P[i-1],P[i]];return a[1]+(b[1]-a[1])*(u-a[0])/(b[0]-a[0]||1)}}return P[P.length-1][1]}
 
 // ---------- Gráfico ----------
 function draw(c,pat,liveEnd){
-  const cv=$("cv"),dpr=window.devicePixelRatio||1,w=cv.clientWidth||320,h=170;
+  const cv=$("cv"),dpr=window.devicePixelRatio||1,w=cv.clientWidth||320,h=230;
   cv.width=w*dpr;cv.height=h*dpr;const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
-  const ymin=-9,ymax=11,Y=st=>h-10-(Math.max(ymin,Math.min(ymax,st))-ymin)/(ymax-ymin)*(h-20),X=u=>12+u*(w-24);
-  g.strokeStyle="#e8e3d8";g.lineWidth=1;g.beginPath();g.moveTo(8,Y(0));g.lineTo(w-8,Y(0));g.stroke();
-  g.fillStyle="#9a958a";g.font="10px sans-serif";g.fillText("agudo ↑",14,14);g.fillText("grave ↓",14,h-4);
+  const top=22,bot=h-34,ymin=-8,ymax=9;
+  const Y=st=>bot-(Math.max(ymin,Math.min(ymax,st))-ymin)/(ymax-ymin)*(bot-top),X=u=>16+u*(w-32);
+  // zona final (donde se decide si sube o baja)
+  g.fillStyle="rgba(192,57,43,.07)";g.fillRect(X(.82),top-6,X(1)-X(.82)+10,bot-top+12);
+  g.fillStyle="#b0503f";g.font="600 10px sans-serif";g.textAlign="center";g.fillText("文末 FINAL",(X(.82)+X(1))/2+5,top-9);
+  g.textAlign="left";g.fillStyle="#9a958a";g.font="10px sans-serif";g.fillText("↑ 高 agudo",6,top-9);g.fillText("↓ 低 grave",6,bot+12);
+  g.strokeStyle="#ebe6dc";g.lineWidth=1;g.beginPath();g.moveTo(8,Y(0));g.lineTo(w-8,Y(0));g.stroke();
+  // palabras repartidas en el eje horizontal
+  const ws=cur().t.replace(/[¿?¡!.,;:]/g,"").split(/\s+/).filter(Boolean),tot=ws.reduce((s,x)=>s+x.length+1,0);
+  let acc=0;g.fillStyle="#55524c";g.font="12px sans-serif";g.textAlign="center";
+  for(const wd of ws){const u=(acc+wd.length/2)/tot;g.fillText(wd,X(u),h-8);acc+=wd.length+1}
+  g.textAlign="left";
   // modelo
-  g.setLineDash([7,6]);g.strokeStyle="rgba(47,93,138,.55)";g.lineWidth=5;g.lineCap="round";g.beginPath();
+  g.setLineDash([8,6]);g.strokeStyle="rgba(47,93,138,.6)";g.lineWidth=6;g.lineCap="round";g.lineJoin="round";g.beginPath();
   for(let k=0;k<=60;k++){const u=k/60,y=Y(targetAt(pat,u));k?g.lineTo(X(u),y):g.moveTo(X(u),y)}g.stroke();g.setLineDash([]);
+  arrow(g,X(1)+4,Y(targetAt(pat,.92)),Y(targetAt(pat,1)),"rgba(47,93,138,.8)");
   if(!c)return;
   const t0=c.t0,t1=liveEnd?Math.max(liveEnd,t0+1.5):c.t1,span=(t1-t0)||1;
-  g.strokeStyle="#c0392b";g.lineWidth=3;g.beginPath();let prev=null;
-  for(const p of c.pts){const x=X((p.t-t0)/span),y=Y(p.st);if(!prev||p.t-prev.t>0.12)g.moveTo(x,y);else g.lineTo(x,y);prev=p}
+  g.strokeStyle="#c0392b";g.lineWidth=4;g.beginPath();let prev=null;
+  for(const p of c.pts){const x=X((p.t-t0)/span),y=Y(p.st);if(!prev||p.t-prev.t>0.25)g.moveTo(x,y);else g.lineTo(x,y);prev=p}
   g.stroke();
 }
 
+function arrow(g,x,y1,y2,col){
+  if(Math.abs(y2-y1)<4)return;const d=y2<y1?-1:1;
+  g.strokeStyle=col;g.fillStyle=col;g.lineWidth=2;g.beginPath();g.moveTo(x,y1);g.lineTo(x,y2);g.stroke();
+  g.beginPath();g.moveTo(x-5,y2-6*d);g.lineTo(x+5,y2-6*d);g.lineTo(x,y2+2*d);g.closePath();g.fill();
+}
 // ---------- Comparación de texto ----------
 function words(s,strict){
   let t=s.toLowerCase().replace(/[¿?¡!.,;:«»"()…]/g," ");
@@ -412,17 +481,17 @@ function getMic(){
 function releaseMic(){if(mic){mic.stream.getTracks().forEach(t=>t.stop());mic=null}}
 document.addEventListener("visibilitychange",()=>{if(document.hidden){if(rs)stopRec();releaseMic()}});
 window.addEventListener("pagehide",releaseMic);
-function setRecUI(on){const b=$("bRec");b.classList.toggle("live",on);b.innerHTML=on?"■ Detener<small>停止</small>":"🎙 Grabar<small>録音する</small>"}
+function setRecUI(on){const b=$("bRec");b.classList.toggle("live",on);b.innerHTML=on?"■ 停止<small>Detener</small>":"🎙 録音する<small>Grabar</small>"}
 function flash(m){$("banner").hidden=false;$("banner").textContent=m}
 
 function startRec(){
   if(rs){stopRec();return}
-  if(!hasMic){flash("Este navegador no permite usar el micrófono. Abre la página en Chrome o Safari (dirección https).");return}
+  if(!hasMic){flash("この端末ではマイクが使えません。Chrome または Safari で開いてください。Abre la página en Chrome o Safari (https).");return}
   try{speechSynthesis.cancel()}catch(e){}
   const it=cur();
   const s={it,frames:[],t0:performance.now(),final:"",interim:"",stopped:false,evaluated:false};
   rs=s;setRecUI(true);
-  $("res").hidden=false;$("scoreNum").textContent="…";$("scoreMsg").textContent="Escuchando… 聞いています";
+  $("res").hidden=false;$("scoreNum").textContent="…";$("scoreMsg").textContent="聞いています… Escuchando";
   $("words").innerHTML="";$("heard").textContent="";$("contrastMsg").textContent="";$("intoMsg").textContent="";
   draw(null,PAT[patOf(it)]);
   try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}
@@ -431,7 +500,7 @@ function startRec(){
       const r=new SR();r.lang=state.variety;r.interimResults=true;r.maxAlternatives=1;r.continuous=false;
       r.onresult=e=>{let fin="",inter="";for(let i=0;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)fin+=x[0].transcript+" ";else inter+=x[0].transcript}
         if(fin.trim())s.final=fin.trim();s.interim=inter;
-        $("heard").textContent="Se oyó 認識: "+(s.final||inter);
+        $("heard").textContent="認識 Se oyó: "+(s.final||inter);
         if(s.evaluated)evaluate(s);};
       r.onerror=e=>{s.recErr=e.error};
       r.onend=()=>{s.recEnded=true;if(rs===s&&(!s.recErr||s.recErr==="no-speech"))stopRec()};
@@ -476,44 +545,59 @@ function evaluate(s){
     const sc=Math.round(100*ok.filter(Boolean).length/tw.length);
     $("scoreNum").textContent=sc+"%";
     $("scoreNum").style.color=sc>=90?"var(--ok)":sc>=60?"var(--mid)":"var(--acc)";
-    $("scoreMsg").textContent=sc>=90?"¡Muy bien! よくできました":sc>=60?"Casi. もう少し":"Otra vez. もう一度";
-    $("heard").textContent="Se oyó 認識: "+heard;
+    $("scoreMsg").textContent=sc>=90?"よくできました！ ¡Muy bien!":sc>=60?"もう少し Casi":"もう一度 Otra vez";
+    $("heard").textContent="認識 Se oyó: "+heard;
     if(it.x){
       const target=tw[tw.length-1],xw=words(it.x,strict)[0];
-      if(hw.includes(xw)&&!hw.includes(target)){cMsg.className="note warn";cMsg.textContent=`Se entendió «${it.x}» en lugar de «${target}». 「${it.x}」と聞こえました。`}
-      else if(hw.includes(target)){cMsg.textContent=`✓ Se distinguió «${target}» de «${it.x}».`}
+      if(hw.includes(xw)&&!hw.includes(target)){cMsg.className="note warn";cMsg.textContent=`「${it.x}」と聞こえました（正しくは「${target}」）。 Se entendió «${it.x}» en lugar de «${target}».`}
+      else if(hw.includes(target)){cMsg.textContent=`✓ 「${target}」と「${it.x}」を言い分けられました。 Se distinguió «${target}» de «${it.x}».`}
     }
     const id=idOf(it);if(best[id]==null||sc>best[id]){best[id]=sc;store.set("pp_best",best)}
-    $("best").textContent="Mejor resultado 最高: "+best[id]+"%";
+    $("best").textContent="最高 Mejor: "+best[id]+"%";
   }else{
     $("scoreNum").textContent="–";$("scoreNum").style.color="";
-    let m="No se reconoció ninguna palabra. もう一度、はっきり言ってみよう。";
-    if(s.recErr==="unsupported")m="Este navegador no tiene reconocimiento de voz; solo se muestra la entonación. この端末では音声認識が使えません。";
-    else if(s.recErr==="not-allowed"||s.recErr==="service-not-allowed")m="Permiso de reconocimiento de voz denegado. Revisa los ajustes del navegador. 音声認識の許可が必要です。";
-    else if(s.recErr==="network")m="El reconocimiento de voz necesita conexión a internet.";
-    else if(s.recErr&&s.recErr!=="no-speech"&&s.recErr!=="aborted")m="Reconocimiento no disponible ("+s.recErr+"). Solo se muestra la entonación.";
+    let m="単語が認識されませんでした。もう一度、はっきり言ってみよう。 No se reconoció ninguna palabra.";
+    if(s.recErr==="unsupported")m="この端末では音声認識が使えません（イントネーションのみ表示）。 Sin reconocimiento de voz; solo entonación.";
+    else if(s.recErr==="not-allowed"||s.recErr==="service-not-allowed")m="音声認識の許可が必要です。ブラウザの設定を確認してください。 Permiso de reconocimiento denegado.";
+    else if(s.recErr==="network")m="音声認識にはインターネット接続が必要です。 Se necesita conexión a internet.";
+    else if(s.recErr&&s.recErr!=="no-speech"&&s.recErr!=="aborted")m="音声認識が使えません（"+s.recErr+"）。イントネーションのみ表示します。 Reconocimiento no disponible.";
     $("scoreMsg").textContent="";$("words").innerHTML="";$("heard").textContent=m;
   }
-  if(s.micErr){$("intoMsg").className="note warn";$("intoMsg").textContent="No se pudo usar el micrófono ("+s.micErr+"): sin curva de entonación. マイクの許可を確認してください。";draw(null,pat);return}
+  if(s.micErr){$("intoMsg").className="note warn";$("intoMsg").textContent="マイクが使えませんでした（"+s.micErr+"）。マイクの許可を確認してください。 No se pudo usar el micrófono.";draw(null,pat);return}
   const c=contour(s.frames);draw(c,pat);
   const im=$("intoMsg");im.className="note";
-  if(!c){im.textContent="No se detectó suficiente voz para dibujar la curva. もう少し大きな声で。";return}
+  if(!c){im.textContent="声が十分に検出されませんでした。もう少し大きな声で。 No se detectó suficiente voz.";return}
   const dur=c.t1-c.t0,seg=(a,b)=>{const q=c.pts.filter(p=>p.t>=c.t0+a*dur&&p.t<=c.t0+b*dur).map(p=>p.st);return q.length?q.reduce((x,y)=>x+y,0)/q.length:null};
   const late=seg(.88,1),mid=seg(.55,.8);
   const sts=c.pts.map(p=>p.st).sort((a,b)=>a-b),range=sts[Math.floor(sts.length*.9)]-sts[Math.floor(sts.length*.1)];
   let dir=null;if(late!=null&&mid!=null){const d=late-mid;dir=d>1.5?1:d<-1.5?-1:0}
-  const name=v=>v===1?"sube ↗":v===-1?"baja ↘":"queda plano →";
+  const name=v=>v===1?"上がる ↗":v===-1?"下がる ↘":"平ら →";const nes=v=>v===1?"sube":v===-1?"baja":"queda plano";
   let msg="";
-  if(dir!==null){msg=(dir===pat.end?"✓ ":"✗ ")+"Al final tu tono "+name(dir)+"; el modelo "+name(pat.end)+". ";
-    msg+=dir===pat.end?"文末の上がり下がりはお手本どおり。":(pat.end===1?"文末をもっと上げてみよう。":"文末をもっと下げてみよう。")}
-  if(range<3)msg+=" Tu entonación es bastante plana: exagera un poco más. 抑揚が少なめ。もう少し大げさに。";
+  if(dir!==null){msg=(dir===pat.end?"✓ ":"✗ ")+"文末：あなたは「"+name(dir)+"」、お手本は「"+name(pat.end)+"」。";
+    msg+=dir===pat.end?"お手本どおりです。":(pat.end===1?"文末をもっと上げてみよう。":"文末をもっと下げてみよう。");
+    msg+=" (Al final tu tono "+nes(dir)+"; el modelo "+nes(pat.end)+".)"}
+  if(range<3)msg+=" 抑揚が少なめです。もう少し大げさに。 (Entonación plana: exagera un poco.)";
   im.textContent=msg;
 }
 
+
+async function loadContent(){
+  if(!SHEET.frases||!SHEET.categorias){setSource("integrado");return}
+  try{
+    const get=u=>fetch(u,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()});
+    let [a,b]=await Promise.all([get(SHEET.categorias),get(SHEET.frases)]);
+    if(/^\s*nivel\s*,/i.test(a)&&!/^\s*nivel\s*,/i.test(b)){[a,b]=[b,a]} // por si los enlaces están invertidos
+    const c=buildContent(toObjs(parseCSV(a)),toObjs(parseCSV(b)));
+    applyContent(c);store.set("pp_content",c);setSource("hoja");
+  }catch(e){const c=store.get("pp_content",null);if(c){applyContent(c);setSource("copia")}else setSource("integrado")}
+}
+function applyContent(c){if(rs)stopRec();CATS=c.cats;DATA=c.data;if(!DATA[state.level]){state.level=Object.keys(DATA)[0];state.idx=0}renderAll();renderFullList()}
+function setSource(k){$("source").textContent={hoja:"教材：Googleシート（最新） · Contenido: hoja de Google",copia:"教材：保存済みのコピー · Contenido: copia guardada (sin conexión)",integrado:"教材：内蔵 · Contenido integrado"}[k]}
 // ---------- Eventos ----------
-$("bListen").onclick=()=>speak(0.9);
-$("bSlow").onclick=()=>speak(0.6);
-$("bMine").onclick=()=>{const p=$("pb");p.currentTime=0;p.play().catch(()=>{})};
+$("bListen").onclick=()=>speak(0.9,$("bListen"));
+$("bSlow").onclick=()=>speak(0.6,$("bSlow"));
+$("bMine").onclick=()=>{const p=$("pb");try{speechSynthesis.cancel()}catch(e){}p.currentTime=0;p.play().then(()=>setPlaying($("bMine"),true,"▶ 再生中…<small>Sonando</small>")).catch(()=>{})};
+$("pb").onended=()=>setPlaying(null,false);$("pb").onpause=()=>setPlaying(null,false);
 $("bRec").onclick=startRec;
 $("bPrev").onclick=()=>{if(rs)stopRec();const n=list().length;state.idx=(state.idx-1+n)%n;save();renderItem()};
 $("bNext").onclick=()=>{if(rs)stopRec();state.idx=(state.idx+1)%list().length;save();renderItem()};
@@ -524,12 +608,12 @@ window.addEventListener("resize",()=>{if(lastSession&&!rs)draw(contour(lastSessi
 
 (function checks(){
   const m=[];
-  if(!window.isSecureContext)m.push("La página debe abrirse desde una dirección https:// para usar el micrófono.");
-  if(!hasMic)m.push("Este navegador no permite el micrófono.");
-  if(!SR)m.push("Este navegador no tiene reconocimiento de voz: se mostrará solo la entonación. Usa Chrome (Android) o Safari (iPhone).");
+  if(!window.isSecureContext)m.push("マイクを使うには https:// のアドレスで開いてください。");
+  if(!hasMic)m.push("この端末ではマイクが使えません。");
+  if(!SR)m.push("この端末では音声認識が使えません（イントネーションのみ）。Android は Chrome、iPhone は Safari を使ってください。");
   if(m.length)flash(m.join(" "));
 })();
-renderAll();renderFullList();
+renderAll();renderFullList();loadContent();
 </script>
 </body>
 </html>
