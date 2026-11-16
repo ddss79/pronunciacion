@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Práctica de pronunciación · Español A1–B1</title>
+<title>¡Practiquemos la pronunciación! · 発音を練習しよう</title>
 <style>
 :root{--bg:#f6f4ef;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--acc:#c0392b;--ok:#2e7d4f;--mid:#b7791f;--line:#e3dfd6;--blue:#2f5d8a}
 *{box-sizing:border-box}
@@ -71,8 +71,8 @@ h3{font-size:.95rem;margin:12px 0 2px}
 </head>
 <body>
 <header>
-  <h1>スペイン語 発音練習</h1>
-  <div class="sub">Práctica de pronunciación · A1–B1</div>
+  <h1>発音を練習しよう！</h1>
+  <div class="sub">¡Practiquemos la pronunciación!</div>
 </header>
 <main>
   <div id="banner" class="banner" hidden></div>
@@ -129,12 +129,17 @@ h3{font-size:.95rem;margin:12px 0 2px}
   </details>
 
   <details>
-    <summary>全リスト · Lista completa</summary>
+    <summary id="listTitle">全リスト · Lista completa</summary>
     <div id="fullList"></div>
   </details>
   <div class="source" id="source"></div>
+  <div class="source">v9.1</div>
 </main>
 
+<script>
+// Muestra cualquier error en pantalla (diagnóstico en el celular)
+window.addEventListener("error",e=>{try{const b=document.getElementById("banner");b.hidden=false;b.textContent="エラー Error: "+e.message+" (línea "+e.lineno+")"}catch(_){}});
+</script>
 <script>
 "use strict";
 // ---------- Contenido ----------
@@ -349,15 +354,16 @@ function renderItem(){
   $("tip").innerHTML=esc(tip.ja||tip.es)+(tip.ja&&tip.es?'<span class="sec">'+esc(tip.es)+"</span>":"");
   $("res").hidden=true;$("bMine").disabled=true;lastSession=null;
 }
-function renderAll(){renderLevels();renderCats();renderItem()}
+function renderAll(){renderLevels();renderCats();renderItem();renderFullList()}
 function renderFullList(){
-  let h="";
-  for(const L of Object.keys(DATA)){
-    h+=`<h3>${L} (${DATA[L].length})</h3><table><tr><th>カテゴリー</th><th>文 Frase</th><th>対比・型</th></tr>`;
-    for(const it of DATA[L])h+=`<tr><td>${esc(catName(CATS[it.c]))}</td><td>${esc(it.t)}</td><td>${it.x?"≠ "+esc(it.x):(it.c==="en"?esc(PAT[patOf(it)].nja):"")}</td></tr>`;
-    h+="</table>";
-  }
-  $("fullList").innerHTML=h;
+  // Solo el nivel seleccionado. Tocar una fila abre esa frase.
+  const L=state.level,items=DATA[L]||[];
+  $("listTitle").textContent="全リスト "+L+" · Lista completa "+L+" ("+items.length+")";
+  let h=`<table><tr><th>カテゴリー</th><th>文 Frase</th><th>対比・型</th></tr>`;
+  items.forEach((it,k)=>{h+=`<tr data-k="${k}" style="cursor:pointer"><td>${esc(catName(CATS[it.c]))}</td><td>${esc(it.t)}</td><td>${it.x?"≠ "+esc(it.x):(it.c==="en"?esc(PAT[patOf(it)].nja):"")}</td></tr>`});
+  $("fullList").innerHTML=h+"</table>";
+  $("fullList").querySelectorAll("tr[data-k]").forEach(tr=>tr.onclick=()=>{
+    if(rs)stopRec();state.cat="all";state.idx=+tr.dataset.k;save();renderCats();renderItem();window.scrollTo({top:0,behavior:"smooth"})});
 }
 
 // ---------- Voz modelo ----------
@@ -615,7 +621,7 @@ async function loadContent(){
     applyContent(c);store.set("pp_content",c);setSource("hoja");
   }catch(e){const c=store.get("pp_content",null);if(c){applyContent(c);setSource("copia")}else setSource("integrado")}
 }
-function applyContent(c){if(rs)stopRec();CATS=c.cats;DATA=c.data;if(!DATA[state.level]){state.level=Object.keys(DATA)[0];state.idx=0}renderAll();renderFullList()}
+function applyContent(c){if(rs)stopRec();CATS=c.cats;DATA=c.data;if(!DATA[state.level]){state.level=Object.keys(DATA)[0];state.idx=0}renderAll()}
 function setSource(k){$("source").textContent={hoja:"教材：Googleシート（最新） · Contenido: hoja de Google",copia:"教材：保存済みのコピー · Contenido: copia guardada (sin conexión)",integrado:"教材：内蔵 · Contenido integrado"}[k]}
 // ---------- Eventos ----------
 $("bListen").onclick=()=>speak(0.9,$("bListen"));
@@ -637,7 +643,7 @@ window.addEventListener("resize",()=>{if(lastSession&&!rs)draw(contour(lastSessi
   if(!SR)m.push("この端末では音声認識が使えません（イントネーションのみ）。Android は Chrome、iPhone は Safari を使ってください。");
   if(m.length)flash(m.join(" "));
 })();
-renderAll();renderFullList();loadContent();
+renderAll();loadContent();
 </script>
 </body>
 </html>
