@@ -36,6 +36,8 @@ small{display:block;font-size:.68rem;color:var(--mute);margin-top:2px}
 .rec{width:100%;margin-top:10px;padding:16px;border-radius:14px;border:none;background:var(--acc);color:#fff;font-size:1.1rem;font-weight:700}
 .rec small{color:rgba(255,255,255,.85)}
 .rec.live{background:#7a1f16;animation:pulse 1.2s infinite}
+.meter{height:8px;background:#eee8dd;border-radius:4px;margin-top:6px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .08s}
 @keyframes pulse{50%{opacity:.72}}
 button:disabled{opacity:.4}
 button{transition:transform .08s,background .15s;-webkit-tap-highlight-color:transparent}
@@ -95,6 +97,7 @@ h3{font-size:.95rem;margin:12px 0 2px}
       <button id="bMine" disabled>▶ 自分の声<small>Mi voz</small></button>
     </div>
     <button class="rec" id="bRec">🎙 録音する<small>Grabar</small></button>
+    <div class="meter" id="meter" hidden><i id="meterBar"></i></div>
     <div class="tip" id="tip"></div>
     <div class="nav">
       <button id="bPrev">← 前へ<small>Anterior</small></button>
@@ -263,9 +266,11 @@ B1:[
 // ===== CONFIGURACIÓN · 設定 =====
 // Enlaces CSV de la hoja de Google publicada en la web (Archivo → Compartir → Publicar en la web).
 // Si están vacíos, se usa el contenido integrado de arriba.
+const SHEET_BASE="https://docs.google.com/spreadsheets/d/e/2PACX-1vSyQCprZs4K8aXDla4yeBYli1m1gRCWJ_4DBPTsFAlKUdPddd9idLObaybBSmC1vqCysr_n16rHVAHN/pub?single=true&output=csv&gid=";
 const SHEET={
-  frases:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSyQCprZs4K8aXDla4yeBYli1m1gRCWJ_4DBPTsFAlKUdPddd9idLObaybBSmC1vqCysr_n16rHVAHN/pub?gid=54657972&single=true&output=csv",
-  categorias:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSyQCprZs4K8aXDla4yeBYli1m1gRCWJ_4DBPTsFAlKUdPddd9idLObaybBSmC1vqCysr_n16rHVAHN/pub?gid=1725461179&single=true&output=csv"
+  categorias:SHEET_BASE+"1725461179",
+  niveles:{A1:SHEET_BASE+"101",A2:SHEET_BASE+"102",B1:SHEET_BASE+"103",B2:SHEET_BASE+"104"},
+  frases:SHEET_BASE+"54657972" // pestaña antigua: solo se usa si las de nivel no responden
 };
 function catName(c){return c?(c.nja&&c.nes&&c.nja!==c.nes?c.nja+" · "+c.nes:(c.nja||c.nes||"")):""}
 function parseCSV(text){
@@ -384,13 +389,15 @@ function speak(rate,btn){
 }
 
 // ---------- Detección de tono (autocorrelación) ----------
+let lastRms=0;
 function detectPitch(buf,sr){
   // submuestreo x2
   const n=buf.length>>1,x=new Float32Array(n);
   for(let i=0;i<n;i++)x[i]=(buf[2*i]+buf[2*i+1])*.5;
   const fs=sr/2;
   let rms=0;for(let i=0;i<n;i++)rms+=x[i]*x[i];rms=Math.sqrt(rms/n);
-  if(rms<0.012)return null;
+  lastRms=rms;
+  if(rms<0.004)return null;
   const minL=Math.floor(fs/500),maxL=Math.ceil(fs/70),N=n-maxL;
   if(N<64)return null;
   const r=new Float32Array(maxL+2);let bestV=0,bestL=-1;
@@ -400,7 +407,7 @@ function detectPitch(buf,sr){
     r[L]=s/Math.sqrt(e0*e1+1e-12);
     if(r[L]>bestV){bestV=r[L];bestL=L}
   }
-  if(bestV<0.6)return null;
+  if(bestV<0.5)return null;
   // evitar errores de octava: primer pico local que alcance 90 % del máximo
   for(let L=minL+1;L<=maxL;L++){if(r[L]>=0.9*bestV&&r[L]>=r[L-1]&&r[L]>=r[L+1]){bestL=L;break}}
   const a=r[bestL-1]||0,b=r[bestL],c=r[bestL+1]||0,den=a-2*b+c;
@@ -473,7 +480,7 @@ function align(a,b){
 let mic=null;
 function getMic(){
   if(mic&&mic.stream.getAudioTracks().some(t=>t.readyState==="live"))return Promise.resolve(mic);
-  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(stream=>{
+  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:true}}).then(stream=>{
     const src=actx.createMediaStreamSource(stream),an=actx.createAnalyser();an.fftSize=2048;src.connect(an);
     mic={stream,an};return mic;
   });
@@ -510,24 +517,32 @@ function startRec(){
   getMic().then(m=>{
     if(s.stopped)return;
     const stream=m.stream,an=m.an;
-    s.an=an;s.buf=new Float32Array(an.fftSize);s.t0=performance.now();
+    s.an=an;s.buf=new Float32Array(an.fftSize);s.t0=performance.now();$("meter").hidden=false;
     try{s.chunks=[];s.mr=new MediaRecorder(stream);s.mr.ondataavailable=e=>{if(e.data&&e.data.size)s.chunks.push(e.data)};s.mr.start()}catch(e){}
     loop(s);
   }).catch(err=>{s.micErr=err.name||"error";if(!s.rec)stopRec()});
-  s.timer=setTimeout(()=>{if(rs===s)stopRec()},10000);
+  // Límite automático: 3 s + 0,5 s por palabra (máx. 12 s), con cuenta regresiva en el botón.
+  const maxSec=Math.min(12,3+0.5*it.t.split(/\s+/).length),tStart=performance.now();
+  s.timer=setTimeout(()=>{if(rs===s)stopRec()},maxSec*1000);
+  const tick=()=>{const left=Math.max(0,Math.ceil(maxSec-(performance.now()-tStart)/1000));const sm=$("bRec").querySelector("small");if(sm)sm.textContent="残り "+left+" 秒 · Detener"};
+  tick();s.countdown=setInterval(tick,250);
 }
 let fc=0;
 function loop(s){
   if(s.stopped)return;
   s.an.getFloatTimeDomainData(s.buf);
   const t=(performance.now()-s.t0)/1000;
-  s.frames.push({t,f:detectPitch(s.buf,actx.sampleRate)});
+  const f=detectPitch(s.buf,actx.sampleRate);s.frames.push({t,f});
+  s.maxRms=Math.max(s.maxRms||0,lastRms);$("meterBar").style.width=Math.min(100,lastRms*600)+"%";
+  // Parada automática por silencio: tras empezar a hablar, 1,4 s sin voz; o 5 s sin hablar nada.
+  if(f){s.lastVoice=t;s.voiced=(s.voiced||0)+1}
+  if((s.voiced>8&&t-s.lastVoice>1.4)||(!s.voiced&&t>5)){stopRec();return}
   if((fc++%4)===0)draw(contour(s.frames),PAT[patOf(s.it)],t);
   requestAnimationFrame(()=>loop(s));
 }
 function stopRec(){
   const s=rs;if(!s||s.stopped)return;
-  s.stopped=true;rs=null;clearTimeout(s.timer);setRecUI(false);
+  s.stopped=true;rs=null;clearTimeout(s.timer);clearInterval(s.countdown);setRecUI(false);$("meter").hidden=true;$("meterBar").style.width="0";
   try{if(s.rec&&!s.recEnded)s.rec.stop()}catch(e){}
   if(s.mr&&s.mr.state!=="inactive"){s.mr.onstop=()=>{try{const blob=new Blob(s.chunks,{type:s.mr.mimeType||"audio/mp4"});$("pb").src=URL.createObjectURL(blob);if(s.it===cur())$("bMine").disabled=false}catch(e){}};try{s.mr.stop()}catch(e){}}
   lastSession=s;
@@ -566,7 +581,10 @@ function evaluate(s){
   if(s.micErr){$("intoMsg").className="note warn";$("intoMsg").textContent="マイクが使えませんでした（"+s.micErr+"）。マイクの許可を確認してください。 No se pudo usar el micrófono.";draw(null,pat);return}
   const c=contour(s.frames);draw(c,pat);
   const im=$("intoMsg");im.className="note";
-  if(!c){im.textContent="声が十分に検出されませんでした。もう少し大きな声で。 No se detectó suficiente voz.";return}
+  if(!c){
+    if((s.maxRms||0)<0.003){im.className="note warn";im.textContent="マイクの音が届いていません。この端末では音声認識と録音を同時に使えない可能性があります。 La señal del micrófono llegó vacía (posible conflicto con el reconocimiento de voz). Nivel máx.: "+(s.maxRms||0).toFixed(4)}
+    else im.textContent="声が十分に検出されませんでした。もう少し大きな声で、母音を長めに。 No se detectó suficiente voz. Nivel máx.: "+s.maxRms.toFixed(3);
+    return}
   const dur=c.t1-c.t0,seg=(a,b)=>{const q=c.pts.filter(p=>p.t>=c.t0+a*dur&&p.t<=c.t0+b*dur).map(p=>p.st);return q.length?q.reduce((x,y)=>x+y,0)/q.length:null};
   const late=seg(.88,1),mid=seg(.55,.8);
   const sts=c.pts.map(p=>p.st).sort((a,b)=>a-b),range=sts[Math.floor(sts.length*.9)]-sts[Math.floor(sts.length*.1)];
@@ -582,12 +600,18 @@ function evaluate(s){
 
 
 async function loadContent(){
-  if(!SHEET.frases||!SHEET.categorias){setSource("integrado");return}
+  if(!SHEET.categorias){setSource("integrado");return}
+  const get=u=>fetch(u,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()});
   try{
-    const get=u=>fetch(u,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()});
-    let [a,b]=await Promise.all([get(SHEET.categorias),get(SHEET.frases)]);
-    if(/^\s*nivel\s*,/i.test(a)&&!/^\s*nivel\s*,/i.test(b)){[a,b]=[b,a]} // por si los enlaces están invertidos
-    const c=buildContent(toObjs(parseCSV(a)),toObjs(parseCSV(b)));
+    const catRows=toObjs(parseCSV(await get(SHEET.categorias)));
+    if(!catRows.length||!("id" in catRows[0]))throw new Error("categorias");
+    // Pestañas por nivel (A1, A2…): el nivel es el nombre de la pestaña.
+    const lv=Object.entries(SHEET.niveles||{});
+    const res=await Promise.all(lv.map(([L,u])=>get(u).then(t=>({L,rows:toObjs(parseCSV(t))})).catch(()=>null)));
+    let rows=[];
+    for(const r of res){if(!r||!r.rows.length||!("frase" in r.rows[0])||("nivel" in r.rows[0]))continue;for(const x of r.rows)rows.push(Object.assign({},x,{nivel:r.L}))}
+    if(!rows.length&&SHEET.frases)rows=toObjs(parseCSV(await get(SHEET.frases)));
+    const c=buildContent(catRows,rows);
     applyContent(c);store.set("pp_content",c);setSource("hoja");
   }catch(e){const c=store.get("pp_content",null);if(c){applyContent(c);setSource("copia")}else setSource("integrado")}
 }
